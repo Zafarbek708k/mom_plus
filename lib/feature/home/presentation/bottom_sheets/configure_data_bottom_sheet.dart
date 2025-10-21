@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mom_plus/core/constants/app_icons.dart';
 import 'package:mom_plus/core/theme/app_colors.dart';
 import 'package:mom_plus/core/utils/enums/main_items.dart';
 import 'package:mom_plus/core/utils/extension/context_extension.dart';
@@ -8,9 +7,11 @@ import 'package:mom_plus/feature/common/presentation/widgets/w_button.dart';
 import 'package:mom_plus/feature/common/presentation/widgets/w_textfield.dart';
 
 class ConfigureDataBottomSheet extends StatelessWidget {
-  const ConfigureDataBottomSheet({super.key, required this.info});
+  const ConfigureDataBottomSheet({super.key, required this.info, required this.valueCtrl, required this.dateCtrl});
 
   final MainItems info;
+  final TextEditingController valueCtrl;
+  final TextEditingController dateCtrl;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +25,7 @@ class ConfigureDataBottomSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: WTextField(
             borderRadius: 16,
+            controller: valueCtrl,
             hasBorderColor: true,
             borderColor: AppColors.gray,
             fillColor: AppColors.textField,
@@ -37,7 +39,7 @@ class ConfigureDataBottomSheet extends StatelessWidget {
             ),
 
             onChanged: (value) {
-              debugPrint("");
+              debugPrint("Value $value");
             },
           ),
         ),
@@ -45,6 +47,7 @@ class ConfigureDataBottomSheet extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: WTextField(
+            controller: dateCtrl,
             borderRadius: 16,
             hasBorderColor: true,
             borderColor: AppColors.gray,
@@ -54,7 +57,7 @@ class ConfigureDataBottomSheet extends StatelessWidget {
               child: Text("Sana", style: context.textTheme.bodyMedium),
             ),
             onChanged: (value) {
-              debugPrint("");
+              debugPrint("Value $value");
             },
           ),
         ),

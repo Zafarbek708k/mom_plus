@@ -95,28 +95,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin, HomeMi
                         info: item,
                         status: state.getBabiesStatus,
                         add: () {
-                          showModalBottomSheet(
-                            constraints: BoxConstraints(maxWidth: context.sizeOf.height * 0.8),
-                            isDismissible: true,
-                            isScrollControlled: false,
-                            enableDrag: false,
-                            context: context,
-                            builder: (context) {
-                              return ConfigureDataBottomSheet(info: _selectedView.value);
-                            },
-                          );
+                          ///
                         },
                         edit: () {
-                          showModalBottomSheet(
-                            constraints: BoxConstraints(maxWidth: context.sizeOf.height * 0.8),
-                            isDismissible: true,
-                            isScrollControlled: false,
-                            enableDrag: false,
-                            context: context,
-                            builder: (context) {
-                              return ConfigureDataBottomSheet(info: _selectedView.value);
-                            },
-                          );
+                          ///
                         },
                         babyInfoWeight: state.birthDateWeight,
                         babyInfoHeight: state.birthDateHeight,
@@ -131,7 +113,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin, HomeMi
                   const SizedBox(height: 16),
                   InfoWidget(
                     data:
-                        "Bu grafiklar JSST (WHO) standartlariga asoslangan. O‘lchovlarni muntazam kiritib, bolaning rivojlanishini kuzating.",
+                    "Bu grafiklar JSST (WHO) standartlariga asoslangan. O‘lchovlarni muntazam kiritib, bolaning rivojlanishini kuzating.",
                   ),
 
                   SizedBox(height: 100),
@@ -151,7 +133,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin, HomeMi
               height: 56,
               text: "${view.buttonTitle} qo’shish",
               textStyle: context.textTheme.titleMedium?.copyWith(color: AppColors.white),
-              onTap: () {},
+              onTap: () {
+                addNew(context: context, valueCtrl: valueCtrl, dateCtrl: dateCtrl);
+              },
             );
           },
         ),
