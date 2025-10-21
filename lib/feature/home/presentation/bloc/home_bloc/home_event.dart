@@ -8,3 +8,8 @@ class GetBabiesEvent extends HomeEvent {
   @override
   List<Object?> get props => [];
 }
+
+class GetHistoriesEvent extends HomeEvent {
+  @override
+  List<Object?> get props => [];
+}
