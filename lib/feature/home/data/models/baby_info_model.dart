@@ -5,7 +5,7 @@ part 'baby_info_model.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class BabyInfoModel extends BabyInfoEntity {
-  const BabyInfoModel({super.value, super.date, super.type, super.unit, super.isBirthDate});
+  const BabyInfoModel({super.value, super.date, super.type, super.unit, super.isBirthDate, super.id, super.period});
 
   factory BabyInfoModel.fromJson(Map<String, dynamic> json) => _$BabyInfoModelFromJson(json);
 

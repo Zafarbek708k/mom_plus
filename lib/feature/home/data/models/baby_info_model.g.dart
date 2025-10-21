@@ -13,12 +13,16 @@ BabyInfoModel _$BabyInfoModelFromJson(Map<String, dynamic> json) =>
       type: json['type'] as String? ?? '',
       unit: json['unit'] as String? ?? '',
       isBirthDate: json['is_birth_date'] as bool? ?? false,
+      id: json['id'] as String? ?? '',
+      period: json['period'] as String? ?? '',
     );
 
 Map<String, dynamic> _$BabyInfoModelToJson(BabyInfoModel instance) =>
     <String, dynamic>{
       'value': instance.value,
       'type': instance.type,
+      'id': instance.id,
+      'period': instance.period,
       'unit': instance.unit,
       'date': instance.date,
       'is_birth_date': instance.isBirthDate,

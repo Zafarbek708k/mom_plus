@@ -7,9 +7,7 @@ part of 'history_model.dart';
 // **************************************************************************
 
 HistoryModel _$HistoryModelFromJson(Map<String, dynamic> json) => HistoryModel(
-  date:
-      (json['date'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const [],
+  date: json['date'] as String? ?? '',
   items:
       (json['items'] as List<dynamic>?)
           ?.map(

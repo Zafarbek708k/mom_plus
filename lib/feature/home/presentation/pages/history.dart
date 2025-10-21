@@ -8,6 +8,7 @@ import 'package:mom_plus/core/utils/enums/main_items.dart';
 import 'package:mom_plus/core/utils/extension/context_extension.dart';
 import 'package:mom_plus/feature/common/presentation/widgets/animated_button.dart';
 import 'package:mom_plus/feature/home/presentation/bloc/home_bloc/home_bloc.dart';
+import 'package:mom_plus/feature/home/presentation/pages/home.dart';
 
 class History extends StatefulWidget {
   const History({super.key});
@@ -43,37 +44,49 @@ class _HistoryState extends State<History> {
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          if (!state.getBabiesStatus.isSuccess) {
-            return SizedBox.shrink();
+          if (state.historyStatus.isInitial) {
+            return LoadingUi();
           }
 
-          return ListView.separated(
+          return ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            itemCount: state.history.length,
+            itemCount: state.histories.length,
             itemBuilder: (context, index) {
-              final item = state.history[index];
-              final type = MainItems.fromString(item.type);
-              return SizedBox(
-                height: 100,
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(type.icon, height: double.infinity),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text("${item.value} ${type.unit}", style: context.textTheme.bodyLarge),
-                        Text("${item.date} ", style: context.textTheme.bodyLarge),
-                      ],
-                    ),
-                  ],
-                ),
+              log("index=$index");
+              final item = state.histories[index];
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.date, style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500)),
+                  ...List.generate(item.items.length, (i) {
+                    final data = item.items[i];
+                    final type = MainItems.fromString(data.type);
+                    return SizedBox(
+                      height: 100,
+                      width: double.infinity,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(type.icon, height: double.infinity),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text("${data.value} ${data.unit}", style: context.textTheme.bodyLarge),
+                              Text("${data.period} ", style: context.textTheme.bodySmall),
+                            ],
+                          ),
+                          Spacer(),
+                          Text(item.date, style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 26),
+                ],
               );
-            },
-            separatorBuilder: (context, index) {
-              return SizedBox(height: 10);
             },
           );
         },

@@ -12,5 +12,6 @@ mixin HomeMixin on State<Home> {
     _tabController.addListener(() {});
 
     homeBloc.add(GetBabiesEvent());
+    homeBloc.add(GetHistoriesEvent());
   }
 }
