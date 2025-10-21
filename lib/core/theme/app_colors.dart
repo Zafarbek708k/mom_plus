@@ -5,6 +5,7 @@ sealed class AppColors {
   static const Color slowWhite = Color(0xffFFFEFE);
   static const Color solitude = Color(0xffF2F5F8);
   static const Color gray = Color(0xffCDD5DF);
+  static const Color textField = Color(0xffFBFDFF);
   static const Color darkBlue = Color(0xff121926);
   static const Color textColor = Color(0xff202939);
   static const Color darkGrey = Color(0xff364152);

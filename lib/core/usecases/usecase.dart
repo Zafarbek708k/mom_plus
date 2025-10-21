@@ -3,6 +3,8 @@ import 'package:mom_plus/core/exceptions/failures.dart';
 import 'package:mom_plus/core/utils/either.dart';
 
 abstract class UseCase<Type, Params> {
+  const UseCase();
+
   Future<Either<Failure, Type>> call(Params params);
 }
 

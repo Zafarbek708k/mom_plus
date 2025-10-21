@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mom_plus/core/service/service_locator.dart';
 import 'package:mom_plus/core/theme/light.dart';
 import 'package:mom_plus/core/utils/extension/context_extension.dart';
 import 'package:mom_plus/feature/home/presentation/bloc/home_bloc/home_bloc.dart';
@@ -15,6 +16,9 @@ void main() {
       DartPluginRegistrant.ensureInitialized();
       WidgetsFlutterBinding.ensureInitialized();
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+      await setup();
+
       runApp(const MyApp());
     },
     (error, stack) {
