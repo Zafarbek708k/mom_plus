@@ -70,7 +70,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin, HomeMi
           controller: _tabController,
           onTap: (value) {
             _selectedView.value = MainItems.values[value];
-            log("Index: $value");
           },
         ),
       ),
@@ -103,7 +102,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin, HomeMi
                             enableDrag: false,
                             context: context,
                             builder: (context) {
-                              return ConfigureDataBottomSheet();
+                              return ConfigureDataBottomSheet(info: _selectedView.value);
                             },
                           );
                         },
@@ -115,7 +114,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin, HomeMi
                             enableDrag: false,
                             context: context,
                             builder: (context) {
-                              return ConfigureDataBottomSheet();
+                              return ConfigureDataBottomSheet(info: _selectedView.value);
                             },
                           );
                         },

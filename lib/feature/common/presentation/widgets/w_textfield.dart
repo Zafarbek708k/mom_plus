@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:mom_plus/core/constants/app_icons.dart';
 import 'package:mom_plus/core/theme/app_colors.dart';
 import 'package:mom_plus/core/utils/extension/context_extension.dart';
+import 'package:mom_plus/feature/common/presentation/widgets/animated_button.dart';
 
 class WTextField extends StatefulWidget {
   final bool? hasSearch;
@@ -22,8 +25,6 @@ class WTextField extends StatefulWidget {
   final TextStyle? labelTextStyle;
   final TextStyle? prefixStyle;
   final String prefixText;
-  final String suffixText; // Added for right side text
-  final TextStyle? suffixTextStyle; // Added for right side text style
   final bool? hideCounterText;
   final Widget? prefix;
   final EdgeInsets? prefixPadding;
@@ -101,10 +102,8 @@ class WTextField extends StatefulWidget {
     this.textStyle,
     this.hintText,
     this.hintTextStyle,
-    this.contentPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    this.contentPadding = const EdgeInsets.only(top: 20, left: 16, bottom: 0),
     this.prefixText = '',
-    this.suffixText = '', // Added
-    this.suffixTextStyle, // Added
     this.prefix,
     this.prefixPadding = const EdgeInsets.all(2),
     this.suffix,
@@ -150,40 +149,39 @@ class WTextField extends StatefulWidget {
   State<WTextField> createState() => _WTextFieldState();
 }
 
-class _WTextFieldState extends State<WTextField> {
+class _WTextFieldState extends State<WTextField> with SingleTickerProviderStateMixin {
   late FocusNode focusNode;
   bool focused = false;
   bool hasText = false;
   bool isObscure = false;
+  bool showStroke = false;
+  late AnimationController animationController;
 
   @override
   void initState() {
+    animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     super.initState();
     if (widget.isObscure != null) {
       isObscure = widget.isObscure!;
     }
-    focusNode = widget.focusNode ?? FocusNode();
+    focusNode = FocusNode();
 
     focusNode.addListener(
       () => setState(() {
-        focused = focusNode.hasFocus;
+        focused = !focused;
       }),
     );
   }
 
   @override
   void dispose() {
-    if (widget.focusNode == null) {
-      focusNode.dispose();
-    }
+    focusNode.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool hasPrefixText = widget.prefixText.isNotEmpty;
-    final bool hasSuffixText = widget.suffixText.isNotEmpty;
-
     return Container(
       margin: widget.margin,
       child: Column(
@@ -206,196 +204,248 @@ class _WTextFieldState extends State<WTextField> {
                             fontWeight: FontWeight.w500,
                           ),
                     ),
-                    if (widget.hintNextToTitle.isNotEmpty)
-                      Text(
-                        ' ${widget.hintNextToTitle}',
-                        style:
-                            widget.hintNextToTitleStyle ??
-                            Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
-                      ),
+                    Text(
+                      ' ${widget.hintNextToTitle}',
+                      style:
+                          widget.hintNextToTitleStyle ??
+                          Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 15, fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
                 if (widget.suffixTitleWidget != null) widget.suffixTitleWidget!,
               ],
-            ),
-          if (widget.title.isNotEmpty) SizedBox(height: widget.sizeBetweenFieldTitle),
+            )
+          else
+            const SizedBox(),
+          SizedBox(height: widget.title.isNotEmpty ? widget.sizeBetweenFieldTitle : null),
           Container(
             height: widget.height,
             width: widget.width,
             decoration: BoxDecoration(
-              borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(widget.borderRadius),
+              borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(8),
+              color: Colors.transparent,
               boxShadow: widget.boxShadow,
             ),
-            child: Row(
+            child: Stack(
+              alignment: Alignment.topCenter,
               children: [
-                // Left side text (prefix)
-                if (hasPrefixText)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: widget.fillColor ?? Colors.transparent,
-                      border: Border.all(color: _getBorderColor(), width: 1),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(widget.borderRadius),
-                        bottomLeft: Radius.circular(widget.borderRadius),
+                ClipRRect(
+                  borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(widget.borderRadius),
+                  child: TextFormField(
+                    keyboardAppearance: context.theme.brightness,
+                    cursorWidth: 1,
+                    buildCounter: widget.buildCounter,
+                    cursorRadius: const Radius.circular(1),
+                    autovalidateMode: widget.autoValidateMode,
+                    validator: widget.validate,
+                    maxLines: widget.maxLines,
+                    onTap: widget.onTap,
+                    initialValue: widget.initial,
+                    readOnly: widget.readOnly,
+                    textAlign: widget.textAlign,
+                    inputFormatters: widget.textInputFormatters,
+                    textInputAction: widget.textInputAction,
+                    textCapitalization: widget.textCapitalization,
+                    obscureText: isObscure,
+                    keyboardType: widget.keyBoardType,
+                    maxLength: widget.maxLength,
+                    controller: widget.controller,
+                    autofocus: widget.autoFocus,
+                    cursorColor: widget.cursorColor,
+                    obscuringCharacter: '●',
+                    cursorHeight: 18,
+                    onEditingComplete: widget.onEditCompleted,
+                    onChanged: (s) {
+                      if (s.length == 1 || s.isEmpty) {
+                        setState(() => hasText = s.isNotEmpty);
+                      }
+                      widget.onChanged(s);
+                    },
+                    focusNode: widget.focusNode ?? focusNode,
+                    style:
+                        widget.textStyle ??
+                        Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
+                    decoration: InputDecoration(
+                      label: widget.label,
+                      labelText: widget.labelText,
+                      labelStyle: widget.labelTextStyle,
+                      floatingLabelAlignment: widget.floatingLabelAlignment,
+                      suffix: widget.suffix != null ? SizedBox(width: widget.suffixSize) : null,
+                      border: OutlineInputBorder(
+                        borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(widget.borderRadius),
+                        borderSide: BorderSide(
+                          width: 1,
+                          color:
+                              widget.hasError
+                                  ? Theme.of(context).colorScheme.error
+                                  : widget.enabledBorderColor ?? AppColors.white,
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.prefixText,
-                        style:
-                            widget.prefixStyle ??
-                            Theme.of(context).textTheme.titleSmall!.copyWith(
-                              color: AppColors.darkBlue,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      counterStyle: widget.counterStyle,
+                      hintText: widget.hintText,
+                      hintStyle:
+                          widget.hintTextStyle ??
+                          Theme.of(context).textTheme.titleSmall!.copyWith(
+                            color: AppColors.gray,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                      filled: true,
+                      prefixIcon:
+                          widget.hasSearch != null && widget.hasSearch!
+                              ? Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                child: SvgPicture.asset(AppIcons.edit),
+                              )
+                              : widget.prefix,
+                      fillColor:
+                          focused
+                              ? widget.focusColor
+                              : widget.disabledColor != null
+                              ? widget.controller != null && widget.controller!.text.isNotEmpty
+                                  ? widget.fillColor ?? Colors.transparent
+                                  : widget.disabledColor
+                              : widget.fillColor ?? Colors.transparent,
+                      contentPadding: widget.contentPadding,
+                      disabledBorder: OutlineInputBorder(
+                        borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(widget.borderRadius),
+                        borderSide: BorderSide(
+                          width: 1,
+                          color:
+                              widget.hasBorderColor != null && widget.hasBorderColor!
+                                  ? widget.borderColor ?? Colors.transparent
+                                  : widget.hasError
+                                  ? Theme.of(context).colorScheme.error
+                                  : widget.disabledBorderColor ?? widget.borderColor ?? Colors.transparent,
+                        ),
                       ),
-                    ),
-                  ),
-                // Text field
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: _getTextFieldBorderRadius(hasPrefixText, hasSuffixText),
-                    child: TextFormField(
-                      keyboardAppearance: context.theme.brightness,
-                      cursorWidth: 1,
-                      buildCounter: widget.buildCounter,
-                      cursorRadius: const Radius.circular(1),
-                      autovalidateMode: widget.autoValidateMode,
-                      validator: widget.validate,
-                      maxLines: widget.maxLines,
-                      onTap: widget.onTap,
-                      initialValue: widget.initial,
-                      readOnly: widget.readOnly,
-                      textAlign: widget.textAlign,
-                      inputFormatters: widget.textInputFormatters,
-                      textInputAction: widget.textInputAction,
-                      textCapitalization: widget.textCapitalization,
-                      obscureText: isObscure,
-                      keyboardType: widget.keyBoardType,
-                      maxLength: widget.maxLength,
-                      controller: widget.controller,
-                      autofocus: widget.autoFocus,
-                      cursorColor: widget.cursorColor,
-                      obscuringCharacter: '●',
-                      cursorHeight: 18,
-                      onEditingComplete: widget.onEditCompleted,
-                      onChanged: (s) {
-                        if (s.length == 1 || s.isEmpty) {
-                          setState(() => hasText = s.isNotEmpty);
-                        }
-                        widget.onChanged(s);
-                      },
-                      focusNode: focusNode,
-                      style:
-                          widget.textStyle ??
-                          Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 14, fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(
-                        label: widget.label,
-                        labelText: widget.labelText,
-                        labelStyle: widget.labelTextStyle,
-                        floatingLabelAlignment: widget.floatingLabelAlignment,
-                        counterText: widget.hideCounterText == true ? '' : null,
-                        counterStyle: widget.counterStyle,
-                        hintText: widget.hintText,
-                        hintStyle:
-                            widget.hintTextStyle ??
-                            Theme.of(context).textTheme.titleSmall!.copyWith(
-                              color: AppColors.gray,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                        filled: true,
-                        fillColor:
-                            focused
-                                ? widget.focusColor
-                                : widget.disabledColor != null && !focused
-                                ? widget.controller != null && widget.controller!.text.isNotEmpty
-                                    ? widget.fillColor ?? Colors.transparent
-                                    : widget.disabledColor
-                                : widget.fillColor ?? Colors.transparent,
-                        contentPadding: widget.contentPadding,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.zero,
-                          borderSide: BorderSide(width: 1, color: _getBorderColor()),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(widget.borderRadius),
+                        borderSide: BorderSide(
+                          width: 1,
+                          color:
+                              widget.hasBorderColor != null && widget.hasBorderColor!
+                                  ? widget.borderColor ?? Colors.transparent
+                                  : widget.hasError
+                                  ? AppColors.darkRed
+                                  : widget.disabledBorderColor ?? widget.enabledBorderColor ?? Colors.transparent,
                         ),
-                        disabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.zero,
-                          borderSide: BorderSide(width: 1, color: _getBorderColor()),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.zero,
-                          borderSide: BorderSide(width: 1, color: _getBorderColor()),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.zero,
-                          borderSide: BorderSide(width: 1, color: _getBorderColor()),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: widget.detailedBorderRadius ?? BorderRadius.circular(widget.borderRadius),
+                        borderSide: BorderSide(
+                          width: 1,
+                          color:
+                              widget.hasBorderColor != null && !widget.hasBorderColor!
+                                  ? widget.borderColor ?? Colors.transparent
+                                  : widget.hasError
+                                  ? AppColors.darkRed
+                                  : widget.borderColor ?? Colors.transparent,
                         ),
                       ),
                     ),
                   ),
                 ),
-                // Right side text (suffix)
-                if (hasSuffixText)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: widget.fillColor ?? Colors.transparent,
-                      border: Border.all(color: _getBorderColor(), width: 1),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(widget.borderRadius),
-                        bottomRight: Radius.circular(widget.borderRadius),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.suffixText,
+                if (widget.prefixText.isNotEmpty)
+                  AnimatedPositioned(
+                    top:
+                        focused
+                            ? 7
+                            : widget.controller!.text.isNotEmpty
+                            ? 7
+                            : widget.topPrefixPadding ?? 12,
+                    left: 16,
+                    duration: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: widget.prefixPadding ?? EdgeInsets.zero,
+                      child: AnimatedDefaultTextStyle(
                         style:
-                            widget.suffixTextStyle ??
-                            Theme.of(context).textTheme.titleSmall!.copyWith(
-                              color: AppColors.gray,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                            widget.prefixStyle ??
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                              fontSize:
+                                  focused
+                                      ? 11
+                                      : widget.controller!.text.isNotEmpty
+                                      ? 11
+                                      : 14,
                             ),
+                        duration: const Duration(milliseconds: 200),
+                        child: Text(widget.prefixText),
                       ),
                     ),
-                  ),
+                  )
+                else
+                  const SizedBox(),
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  right: widget.suffixRightPosition ?? 0,
+                  child:
+                      widget.hasClearButton != null && widget.hasClearButton!
+                          ? widget.controller != null && widget.controller!.text.isNotEmpty
+                              ? GestureDetector(
+                                onTap: () {
+                                  setState(() {});
+                                  widget.controller!.clear();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: SvgPicture.asset(AppIcons.edit),
+                                ),
+                              )
+                              : const SizedBox()
+                          : Padding(
+                            padding: widget.suffixPadding ?? const EdgeInsets.all(8.0),
+                            child: widget.suffix ?? const SizedBox(),
+                          ),
+                ),
+                Positioned(
+                  // top: 0,
+                  right: 8,
+                  child:
+                      widget.isObscure == null
+                          ? widget.suffixIcon != null
+                              ? AnimatedButton(
+                                onTap: () {},
+                                child: Padding(
+                                  padding: widget.suffixPadding!,
+                                  child: SvgPicture.asset(widget.suffixIcon!),
+                                ),
+                              )
+                              : const SizedBox()
+                          : GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isObscure = !isObscure;
+                              });
+                              if (showStroke) {
+                                showStroke = false;
+                                animationController.forward();
+                              } else {
+                                showStroke = true;
+                                animationController.reverse();
+                              }
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              margin: const EdgeInsets.only(top: 10),
+                              width: 24,
+                              height: 24,
+                              child: Center(
+                                child: AnimatedBuilder(
+                                  animation: animationController,
+                                  child: SvgPicture.asset(isObscure ? AppIcons.edit : AppIcons.edit),
+                                  builder: (context, child) => SizedBox(width: 24, height: 24, child: child),
+                                ),
+                              ),
+                            ),
+                          ),
+                ),
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  Color _getBorderColor() {
-    if (widget.hasError) {
-      return widget.errorColor ?? AppColors.darkRed;
-    }
-    if (focused) {
-      return widget.borderColor ?? AppColors.darkBlue;
-    }
-    if (widget.hasBorderColor != null && widget.hasBorderColor!) {
-      return widget.borderColor ?? AppColors.gray.withValues(alpha: 0.3);
-    }
-    return widget.enabledBorderColor ?? AppColors.gray.withValues(alpha: 0.3);
-  }
-
-  BorderRadius _getTextFieldBorderRadius(bool hasPrefix, bool hasSuffix) {
-    if (hasPrefix && hasSuffix) {
-      return BorderRadius.zero;
-    } else if (hasPrefix) {
-      return BorderRadius.only(
-        topRight: Radius.circular(widget.borderRadius),
-        bottomRight: Radius.circular(widget.borderRadius),
-      );
-    } else if (hasSuffix) {
-      return BorderRadius.only(
-        topLeft: Radius.circular(widget.borderRadius),
-        bottomLeft: Radius.circular(widget.borderRadius),
-      );
-    }
-    return BorderRadius.circular(widget.borderRadius);
   }
 }

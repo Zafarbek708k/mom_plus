@@ -44,7 +44,10 @@ class _HistoryState extends State<History> {
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          if (state.historyStatus.isInitial) {
+          if (state.historyStatus.isFailure) {
+            return Center(child: Text("Something went wrong", style: context.textTheme.bodySmall));
+          }
+          if (!state.historyStatus.isSuccess) {
             return LoadingUi();
           }
 
@@ -52,7 +55,6 @@ class _HistoryState extends State<History> {
             padding: EdgeInsets.symmetric(horizontal: 16),
             itemCount: state.histories.length,
             itemBuilder: (context, index) {
-              log("index=$index");
               final item = state.histories[index];
 
               return Column(
